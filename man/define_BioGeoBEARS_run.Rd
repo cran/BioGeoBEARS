@@ -1,6 +1,6 @@
 \name{define_BioGeoBEARS_run}
 \alias{define_BioGeoBEARS_run}
-\title{Define a MAXIMUM LIKELIHOOD search, perhaps stratified}
+\title{Define a maximum likelihood search, perhaps stratified}
 \usage{
   define_BioGeoBEARS_run(abbr = "default",
     description = "defaults",
@@ -9,10 +9,13 @@
     geogfn = "Psychotria_geog.data", timesfn = NA,
     distsfn = NA, dispersal_multipliers_fn = NA,
     area_of_areas_fn = NA, areas_allowed_fn = NA,
-    max_range_size = NA, states_list = NA,
-    force_sparse = NA, print_optim = TRUE,
+    max_range_size = NA, states_list = NULL,
+    force_sparse = FALSE, print_optim = TRUE,
     num_cores_to_use = NA, cluster_already_open = FALSE,
-    use_optimx = TRUE)
+    use_optimx = TRUE, return_condlikes_table = FALSE,
+    calc_TTL_loglike_from_condlikes_table = TRUE,
+    calc_ancprobs = TRUE, fixnode = NULL, fixlikes = NULL,
+    speedup = TRUE)
 }
 \arguments{
   \item{abbr}{Text abbreviation of run, e.g. "default"}
@@ -59,7 +62,14 @@
   states/geographic ranges, in 0-based index form.}
 
   \item{force_sparse}{Should sparse matrix exponentiation
-  be used?}
+  be used?  Default \code{FALSE}, which means dense matrix
+  exponentiation is always used. If \code{NA}, the program
+  will use sparse matrix exponentiation for transition
+  matrices above rank 128 (size 128x128).  NOTE: Sparse
+  matrix exponentiation seems to give correlated, but not
+  exact, results, and these errors may accumulate.
+  Presumably the problems become less with larger matrices,
+  but I have not explored this in detail.}
 
   \item{print_optim}{If TRUE (default), print the
   optimization steps as ML estimation progresses.}
@@ -85,12 +95,42 @@
 
   \item{use_optimx}{If TRUE, use \code{optimx} rather that
   \code{optim}.}
+
+  \item{return_condlikes_table}{If \code{TRUE}, return the
+  table of ALL conditional likelihood results, including at
+  branch subsections (only some should be used in
+  calculating the final log-likelihood of the geography
+  range data on the tree!)}
+
+  \item{calc_TTL_loglike_from_condlikes_table}{If TRUE,
+  force making of the condlikes table, and use it to
+  calculate the log-likelihood (default=TRUE; matches
+  LAGRANGE).}
+
+  \item{calc_ancprobs}{If \code{TRUE} (default), calculate
+  and return the necessary pieces (uppass and downpass
+  probs) for ancestral states.}
+
+  \item{fixnode}{If the state at a particular node is going
+  to be fixed (e.g. for ML marginal ancestral states), give
+  the node number.}
+
+  \item{fixlikes}{The state likelihoods to be used at the
+  fixed node.  I.e. 1 for the fixed state, and 0 for the
+  others.}
+
+  \item{speedup}{If \code{TRUE} (default), set the maximum
+  number of iterations to \code{itnmax=50*(number of free
+  parameters)}, instead of the \code{optimx} default, 250.
+  Also set \code{optimx} \code{reltol} parameter to 0.001
+  (instead of the default, ~1e-8).}
 }
 \value{
   \code{inputs} Inputs for ML search.
 }
 \description{
-  Set up the inputs object for an ML search.
+  Set up the inputs object for an ML search.  See parameter
+  descriptions for defaults.
 }
 \note{
   Go BEARS!
