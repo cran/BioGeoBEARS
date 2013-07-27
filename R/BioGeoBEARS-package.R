@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #' Package: \tab BioGeoBEARS\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.2\cr
-#' Date: \tab 2012-07-25\cr
+#' Version: \tab 0.2.1\cr
+#' Date: \tab 2012-07-27\cr
 #' License: \tab GPL (>= 3)\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -42,7 +42,14 @@
 #' fossils are tips on the phylogeny.  Bayesian analysis has been implemented
 #' through use of the "LaplacesDemon" package, however this package is 
 #' now maintained off of CRAN, so its usage is not formally included in 
-#' BioGeoBEARS at the current time.
+#' BioGeoBEARS at the current time.  
+#' 
+#' CITATION INFO: This package is 
+#' the result of my Ph.D. research, please cite the package if you use 
+#' it! Type: citation(package="BioGeoBEARS") to get the citation information.
+#' 
+#' See also the citation information for the sister packages,
+#' \code{citation(package="rexpokit")} and \code{citation(package="cladoRcpp")}.
 #'
 #' @name BioGeoBEARS-package
 #' @aliases BioGeoBEARS
@@ -60,4 +67,13 @@
 #' @seealso \code{\link[rexpokit]{rexpokit}} \code{\link[cladoRcpp]{cladoRcpp}}
 #' @examples
 #' test=1
+#' 
+#' # To get citation information for BioGeoBEARS, type:
+#' citation(package="BioGeoBEARS")
+#' 
+#' # Please also cite the accessory packages I created to make BioGeoBEARS work:
+#' citation(package="cladoRcpp")
+#' citation(package="rexpokit")		# Roger Sidje is a coauthor of rexpokit 
+#'                                  # and author of the FORTRAN EXPOKIT
+#' 
  

@@ -730,7 +730,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	# This is all you need for a standard likelihood calculation
 	# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = rel probs AT A NODE
 	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS <- matrix(data=0, nrow=numnodes, ncol=numstates)
-	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state
+	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state / rowSums(tip_condlikes_of_data_on_each_state)
 	condlikes_of_each_state = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
 	#relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] <- 1
 	

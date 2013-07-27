@@ -1943,7 +1943,9 @@ AkaikeWeights_on_summary_table <- function(restable, colname_to_use="AIC", add_t
 
 
 
-
+#######################################################
+# AICstats_2models
+#######################################################
 #' Calculate all the AIC and LRT stats between two models
 #' 
 #' The Likelihood Ratio Test (LRT) is a standard method for testing whether or not the data likelihood
@@ -1972,6 +1974,7 @@ AkaikeWeights_on_summary_table <- function(restable, colname_to_use="AIC", add_t
 #'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
+#' 
 AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
 	{
 	defaults='

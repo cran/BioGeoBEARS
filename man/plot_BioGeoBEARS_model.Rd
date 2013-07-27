@@ -2,9 +2,8 @@
 \alias{plot_BioGeoBEARS_model}
 \title{Graphical display of your anagenetic and cladogenetic biogeography models}
 \usage{
-  plot_BioGeoBEARS_model(obj,
-    obj_is_run_or_results = "run", plotwhat = "init",
-    titletxt = "", statenames = NULL)
+  plot_BioGeoBEARS_model(obj, obj_is_run_or_results = NULL,
+    plotwhat = "init", titletxt = "", statenames = NULL)
 }
 \arguments{
   \item{obj}{The input object, either a

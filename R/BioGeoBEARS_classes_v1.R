@@ -322,7 +322,23 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 	param_table
 
 
-	# Detection probability (per observation)
+	# Mean frequency of truly sampling OTU of interest
+	param_name = "mf"
+	param_data = param_data_starter
+	param_data$type = "fixed"
+	param_data$init = 0.1
+	param_data$min = 0 + minval_anagenesis
+	param_data$max = 1 - minval_anagenesis
+	param_data$est = param_data$init
+	param_data$note = "yes"
+	param_data$desc = "mean frequency of truly sampling OTU of interest"
+	names(param_data) = names(param_data_starter)
+	param_table = rbind(param_table, param_data)
+	rownames(param_table) = (param_names = c(param_names, param_name))
+	param_table
+
+
+	# Detection probability (per true sample of OTU of interest)
 	param_name = "dp"
 	param_data = param_data_starter
 	param_data$type = "fixed"
@@ -330,8 +346,23 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 	param_data$min = 0 + minval_anagenesis
 	param_data$max = 1 - minval_anagenesis
 	param_data$est = param_data$init
-	param_data$note = "no"
-	param_data$desc = "detection probability"
+	param_data$note = "yes"
+	param_data$desc = "detection probability per true sample of OTU of interest"
+	names(param_data) = names(param_data_starter)
+	param_table = rbind(param_table, param_data)
+	rownames(param_table) = (param_names = c(param_names, param_name))
+	param_table
+
+	# False detection probability (per true sample of non-OTU of interest)
+	param_name = "fdp"
+	param_data = param_data_starter
+	param_data$type = "fixed"
+	param_data$init = 0
+	param_data$min = 0 + minval_anagenesis
+	param_data$max = 1 - minval_anagenesis
+	param_data$est = param_data$init
+	param_data$note = "yes"
+	param_data$desc = "false detection of OTU probability per true taphonomic control sample"
 	names(param_data) = names(param_data_starter)
 	param_table = rbind(param_table, param_data)
 	rownames(param_table) = (param_names = c(param_names, param_name))
@@ -372,6 +403,7 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 #' 
 #' @param params_table The \code{params_table} from a \code{BioGeoBEARS_model_object}.
 #' @param sumval Default=1.
+#' @param plotwhat Default "est", use "init" to get the initial starting values instead.
 #' @return \code{wts} Return the per-event weights
 #' @export
 #' @seealso \code{\link[base]{rbind}}
@@ -412,12 +444,12 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 #' get_perEvent_probs(params_table)
 #' 
 #'
-get_perEvent_probs <- function(params_table, sumval=1)
+get_perEvent_probs <- function(params_table, sumval=1, plotwhat="est")
 	{
-	j = params_table["j", "est"]
-	y = params_table["y", "est"]
-	s = params_table["s", "est"]
-	v = params_table["v", "est"]
+	j = params_table["j", plotwhat]
+	y = params_table["y", plotwhat]
+	s = params_table["s", plotwhat]
+	v = params_table["v", plotwhat]
 	
 	jysv_val = j+y+s+v
 	
@@ -862,6 +894,8 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' @param dispersal_multipliers_fn Filename for the changing hard-coded dispersal multipliers
 #' @param area_of_areas_fn Filename for the area of each area
 #' @param areas_allowed_fn Filename for the allowed connections between areas for single-species ranges.
+#' @param detects_fn Filename for the counts of detections of OTUs of interest. See \code{\link{calc_obs_like}}.
+#' @param controls_fn Filename for the counts of taphonomic controls (which INCLUDE the OTUs of interest). See \code{\link{calc_obs_like}}.
 #' @param max_range_size The maximum rangesize, in number of areas.  Having a smaller maximum range size means that you can have more areas (the size of the
 #' state space is greatly reduced; see \code{\link[cladoRcpp]{numstates_from_numareas}}.
 #' @param states_list A list of the possible states/geographic ranges, in 0-based index form.
@@ -869,7 +903,11 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' If \code{NA}, the program will
 #' use sparse matrix exponentiation for transition matrices above rank 128 (size 128x128).  NOTE: Sparse matrix exponentiation seems to give correlated, but 
 #' not exact, results, and these errors may accumulate.  Presumably the problems become less with larger matrices, but I have not explored this in detail.
+#' @param use_detection_model If TRUE, use the detection model (with parameters mf, dp, and fdp) and counts of detections and counts of taphonomic controls to 
+#' calculate the \code{tip_condlikes_of_data_on_each_state}.
 #' @param print_optim If TRUE (default), print the optimization steps as ML estimation progresses.
+#' @param tmpwd The working directory in which the input and output files will be placed. Default is \code{\link[base]{getwd}}. This is stored 
+#' mostly for future reference; users are responsible for manually navigating to the appropriate directory ahead of time, using \code{\link[base]{setwd}}.
 #' @param num_cores_to_use If >1, parallel processing will be attempted. \bold{Note:} parallel processing via \code{library (parallel)} will work in Mac command-line
 #' R, but not in Mac GUI \code{R.app}.
 #' @param cluster_already_open If the user wants to distribute the matrix exponentiation calculations from all the branches across a number of processors/nodes on 
@@ -888,7 +926,7 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' \code{optimx} default, 250.  Also set \code{optimx} \code{reltol} parameter to 0.001 (instead of the default, ~1e-8).
 #' @return \code{inputs} Inputs for ML search.
 #' @export
-#' @seealso \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
+#' @seealso \code{\link{readfiles_BioGeoBEARS_run}}, \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}, \code{\link[base]{setwd}}, \code{\link[base]{getwd}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -898,7 +936,7 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' @examples
 #' test=1
 #' 
-define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGeoBEARS_model_object=define_BioGeoBEARS_model_object(), trfn="Psychotria_5.2.newick", geogfn="Psychotria_geog.data", timesfn=NA, distsfn=NA, dispersal_multipliers_fn=NA, area_of_areas_fn=NA, areas_allowed_fn=NA, max_range_size=NA, states_list=NULL, force_sparse=FALSE, print_optim=TRUE, num_cores_to_use=NA, cluster_already_open=FALSE, use_optimx=TRUE, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE, calc_ancprobs=TRUE, fixnode=NULL, fixlikes=NULL, speedup=TRUE)
+define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGeoBEARS_model_object=define_BioGeoBEARS_model_object(), trfn="Psychotria_5.2.newick", geogfn="Psychotria_geog.data", timesfn=NA, distsfn=NA, dispersal_multipliers_fn=NA, area_of_areas_fn=NA, areas_allowed_fn=NA, detects_fn=NA, controls_fn=NA, max_range_size=NA, states_list=NULL, force_sparse=FALSE, use_detection_model=FALSE, print_optim=TRUE, num_cores_to_use=NA, cluster_already_open=FALSE, use_optimx=TRUE, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE, calc_ancprobs=TRUE, fixnode=NULL, fixlikes=NULL, speedup=TRUE, tmpwd=getwd())
 	{
 	inputs = list()
 	
@@ -908,14 +946,18 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 	inputs$trfn = trfn
 	inputs$geogfn = geogfn
 	inputs$timesfn = timesfn
-	inputs$distsfn = distsfn									# distance between areas, for dispersal ~ dist^x
-	inputs$dispersal_multipliers_fn = dispersal_multipliers_fn	# hard-coded dispersal multiplier (or 0s/1s for constraints)
+	inputs$distsfn = distsfn										# distance between areas, for dispersal ~ dist^x
+	inputs$dispersal_multipliers_fn = dispersal_multipliers_fn		# hard-coded dispersal multiplier (or 0s/1s for constraints)
 	inputs$area_of_areas_fn = area_of_areas_fn						# area of each areas (for extinction ~ area^u)
-	inputs$areas_allowed_fn = areas_allowed_fn				# if ONLY connected areas are allowed
+	inputs$areas_allowed_fn = areas_allowed_fn						# if ONLY connected areas are allowed
+	inputs$detects_fn = detects_fn									# used only if use_detection_model==TRUE
+	inputs$controls_fn = controls_fn								# used only if use_detection_model==TRUE
 	inputs$max_range_size = max_range_size
 	inputs$states_list = states_list
 	inputs$force_sparse = force_sparse
+	inputs$use_detection_model = use_detection_model
 	inputs$print_optim = print_optim
+	inputs$wd = tmpwd												# Store the working directory you are in
 	inputs$num_cores_to_use = num_cores_to_use
 	inputs$cluster_already_open = cluster_already_open
 	inputs$use_optimx = use_optimx
@@ -1455,15 +1497,20 @@ prune_states_list <- function(states_list_0based_index, areas_allowed_mat)
 #######################################################
 # readfiles_BioGeoBEARS_run
 #######################################################
-#' Read in the stratification input files, if any
+#' Read in the extra input files, if any
 #' 
-#' areas_allowed file is just a list of distance matrices, separated by blank lines,
+#' This function reads input files for stratification, constraints, and detection, i.e.,
+#' everything except the tree and geography files. E.g., \code{areas_allowed_fn} file is 
+#' just a list of distance matrices, separated by blank lines,
 #' from youngest to oldest.
 #' 
 #' @param inputs The inputs list
 #' @return \code{inputs} The modified inputs list
 #' @export
-#' @seealso \code{\link[stats]{convolve}}
+#' @seealso \code{\link{define_BioGeoBEARS_run}}, \code{\link{read_times_fn}}, 
+#' \code{\link{read_distances_fn}}, \code{\link{read_dispersal_multipliers_fn}}, 
+#' \code{\link{read_area_of_areas_fn}}, \code{\link{read_areas_allowed_fn}}, 
+#' \code{\link{read_detections}}, \code{\link{read_controls}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -1499,7 +1546,22 @@ readfiles_BioGeoBEARS_run <- function(inputs)
 		{
 		inputs$list_of_areas_allowed_mats = read_areas_allowed_fn(inputs)
 		}
-	inputs	
+	
+	
+	# If the detection model is turned on:
+	if (inputs$use_detection_model == TRUE)
+		{
+		phy = read.tree(inputs$trfn)
+		
+		if (is.character(inputs$detects_fn))
+			{
+			inputs$detects_df = read_detections(inputs$detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+			}
+		if (is.character(inputs$detects_fn))
+			{
+			inputs$controls_df = read_controls(inputs$controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+			}
+		}
 		
 	return(inputs)
 	}

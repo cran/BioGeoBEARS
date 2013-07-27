@@ -33,7 +33,7 @@
 #' @param statecex \code{cex} value for the states (scaling factor, i.e. 0.5 is half size). Used on piecharts if plotwhat="pie".
 #' @param splitcex \code{cex} value for the splits (scaling factor, i.e. 0.5 is half size). Used on piecharts if plotwhat="pie".
 #' @param titlecex \code{cex} value for the title (scaling factor, i.e. 0.5 is half size). 
-#' @param plotsplits If \code{TRUE}, plot states on the corners. (Pie charts on the corners are not implemented.)
+#' @param plotsplits If \code{TRUE}, plot states on the corners -- text or pie charts, depending on \code{plotwhat}.
 #' @param plotlegend If \code{TRUE}, make a (separate) plot with a legend giving the colors for each state/range, using \code{\link{colors_legend}}.
 #' @param legend_ncol The number of columns in the legend.  If \code{NULL} (default), the function calculates \code{floor(sqrt(length(possible_ranges_list_txt) / 2))} 
 #' when the number of states is <=64, and \code{sqrt(ceiling(length(possible_ranges_list_txt)))} when > 64. Note that when you have hundreds of states, there is probably 
@@ -286,7 +286,7 @@ plot_BioGeoBEARS_results <- function(results_object, analysis_titletxt=NULL, add
 			}
 		}
 
-	if ((plotsplits == TRUE) && (plotwhat == "text"))
+	if (plotsplits == TRUE)
 		{
 		#######################################################
 		# Also add the splits to the plot
@@ -297,33 +297,52 @@ plot_BioGeoBEARS_results <- function(results_object, analysis_titletxt=NULL, add
 
 		# LEFT SPLITS
 		relprobs_matrix = left_ML_marginals_by_node
-		MLprobs = get_ML_probs(relprobs_matrix)
-		MLprobs
-		MLstates = get_ML_states_from_relprobs(relprobs_matrix, statenames, returnwhat="states", if_ties="takefirst")
-		MLstates
-		length(MLstates)
 		
-		# Set up colors
-		possible_ranges_list_txt = areas_list_to_states_list_new(areas,  maxareas=max_range_size, split_ABC=FALSE, include_null_range=include_null_range)
-		cols_byNode = rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+		if (plotwhat == "text")
+			{
+			MLprobs = get_ML_probs(relprobs_matrix)
+			MLprobs
+			MLstates = get_ML_states_from_relprobs(relprobs_matrix, statenames, returnwhat="states", if_ties="takefirst")
+			MLstates
+			length(MLstates)
+		
+			# Set up colors
+			possible_ranges_list_txt = areas_list_to_states_list_new(areas,  maxareas=max_range_size, split_ABC=FALSE, include_null_range=include_null_range)
+			cols_byNode = rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+			cornerlabels(text=MLstates, coords=coords$leftcorns, bg=cols_byNode, cex=splitcex)
+			}
+		
+		if (plotwhat == "pie")
+			{
+			cornerpies(pievals=relprobs_matrix, coords$leftcorns, piecol=colors_list_for_states, cex=splitcex)
+			}
 
-		cornerlabels(text=MLstates, coords=coords$leftcorns, bg=cols_byNode, cex=splitcex)
 
 
 		# RIGHT SPLITS
 		relprobs_matrix = right_ML_marginals_by_node
-		MLprobs = get_ML_probs(relprobs_matrix)
-		MLprobs
-		MLstates = get_ML_states_from_relprobs(relprobs_matrix, statenames, returnwhat="states", if_ties="takefirst")
-		MLstates
-		length(MLstates)
 
-		# Set up colors
-		possible_ranges_list_txt = areas_list_to_states_list_new(areas,  maxareas=max_range_size, split_ABC=FALSE, include_null_range=include_null_range)
-		cols_byNode = rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+		if (plotwhat == "text")
+			{
+			MLprobs = get_ML_probs(relprobs_matrix)
+			MLprobs
+			MLstates = get_ML_states_from_relprobs(relprobs_matrix, statenames, returnwhat="states", if_ties="takefirst")
+			MLstates
+			length(MLstates)
 
-		cornerlabels(text=MLstates, coords=coords$rightcorns, bg=cols_byNode, cex=splitcex)
+			# Set up colors
+			possible_ranges_list_txt = areas_list_to_states_list_new(areas,  maxareas=max_range_size, split_ABC=FALSE, include_null_range=include_null_range)
+			cols_byNode = rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+
+			cornerlabels(text=MLstates, coords=coords$rightcorns, bg=cols_byNode, cex=splitcex)
+			}
+
+		if (plotwhat == "pie")
+			{
+			cornerpies(pievals=relprobs_matrix, coords$rightcorns, piecol=colors_list_for_states, cex=splitcex)			
+			}
 		}
+
 
 
 	# Handy summary outputs
@@ -1051,7 +1070,7 @@ order_LGnodes <- function(MLsplits_LGcpp, tr=NULL, removechar=NULL, type="C++", 
 #######################################################
 #' Make labels for plotting ranges on corners
 #' 
-#' What it says.
+#' This function makes labels for plotting ranges on corners.
 #' 
 #' @param text The text to put at the corners.
 #' @param coords The coordinates at which to plot the labels
@@ -1061,7 +1080,8 @@ order_LGnodes <- function(MLsplits_LGcpp, tr=NULL, removechar=NULL, type="C++", 
 #' @param ... Additional arguments to standard functions
 #' @return nothing
 #' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
+#' @seealso \code{\link{cornerpies}}, \code{\link{corner_coords}}, \code{\link{get_lagrange_nodenums}}, 
+#' \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -1105,6 +1125,91 @@ cornerlabels <- function(text, coords, bg="green3", col="black", adj=c(0.5,0.5),
 	}
 
 
+
+#######################################################
+# cornerpies
+#######################################################
+#' Make pie charts for plotting ranges on corners
+#' 
+#' This function makes pie charts for plotting ranges on corners.  It makes use of 
+#' \code{ape:::floating.pie.asp} to plot the pie charts on the corners.
+#' 
+#' To get the corner coordinates, use \code{\link{corner_coords}}.  Please note the 
+#' special input required in that function to get it to access a corner-coordinates 
+#' function in the extensions data (\code{extdata}) directory.
+#' 
+#' @param pievals The matrix (numnodes x numstates) of probabilities to plot.
+#' @param coords The coordinates at which to plot the labels.
+#' @param piecol The color for each possible state.
+#' @param adj Position adjustment; default \code{adj=c(0.5,0.5)}
+#' @param ... Additional arguments to standard functions
+#' @return nothing
+#' @export
+#' @seealso \code{\link{cornerlabels}}, \code{\link{corner_coords}}, \code{\link{get_lagrange_nodenums}}, 
+#' \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#' @examples
+#' test=1
+#' 
+cornerpies <- function(pievals, coords, piecol, adj=c(0.5,0.5), ...)
+	{
+	require(ape)	# for ape:::floating.pie.asp
+	
+	args <- list(...)
+    CEX <- if ("cex" %in% names(args)) 
+    	{
+	    args$cex
+	    } else {
+	    par("cex")
+	    }
+	   
+# 	# Draw the rectangles	   
+# 	width <- strwidth(text, units = "inches", cex = CEX)
+# 	height <- strheight(text, units = "inches", cex = CEX)
+# 
+# 	width <- xinch(width)
+# 	height <- yinch(height)
+
+	XX = coords$x
+	YY = coords$y	
+# 	xl <- XX - width * adj[1] - xinch(0.03)
+# 	xr <- xl + width + xinch(0.03)
+# 	yb <- YY - height * adj[2] - yinch(0.02)
+# 	yt <- yb + height + yinch(0.05)
+# 	rect(xl, yb, xr, yt, col = bg)
+# 	
+# 	# Write the text
+# 	text(XX, YY, text, adj = adj, col = col, ...)
+	
+	if (is.vector(pie))
+		{
+		pie <- cbind(pie, 1 - pie)
+		}
+	xrad <- CEX * diff(par("usr")[1:2])/50
+	xrad <- rep(xrad, nrow(pievals))
+	XX <- XX + adj[1] - 0.5
+	YY <- YY + adj[2] - 0.5
+	
+	# Loop through the nodes
+	for (i in 1:nrow(pievals))
+		{
+		if (any(is.na(pievals[i, ]))) 
+			{
+			next()
+			}
+		ape:::floating.pie.asp(XX[i], YY[i], pievals[i, ], radius = xrad[i], col = piecol, ...)
+		}
+	
+	
+	return()
+	}
 
 
 
@@ -1342,7 +1447,7 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 #' @examples
 #' blah=1
 #' 
-plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results="run", plotwhat="init", titletxt="", statenames=NULL)
+plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results=NULL, plotwhat="init", titletxt="", statenames=NULL)
 	{
 	runjunk='
 	obj = BioGeoBEARS_run_object
@@ -1352,6 +1457,13 @@ plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results="run", plotwhat="i
 	'
 	
 	
+	if (is.null(obj_is_run_or_results) == TRUE)
+		{
+		stoptxt = "\n\nWith plot_BioGeoBEARS_model(), you must specify whether obj_is_run_or_results='run' or 'results'.\n"
+		cat(stoptxt)
+		stop(stoptxt)
+		}
+		
 	if (obj_is_run_or_results == "run")
 		{
 		BioGeoBEARS_run_object = obj
@@ -1360,8 +1472,8 @@ plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results="run", plotwhat="i
 		if (obj_is_run_or_results == "results")
 			{
 			# Extract the correct inputs and outputs
-			BioGeoBEARS_run_object = obj_is_run_or_results$inputs
-			BioGeoBEARS_run_object$BioGeoBEARS_model_object = obj_is_run_or_results$outputs
+			BioGeoBEARS_run_object = obj$inputs
+			BioGeoBEARS_run_object$BioGeoBEARS_model_object = obj$outputs
 			BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
 			}		
 		else {
@@ -1569,12 +1681,14 @@ plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results="run", plotwhat="i
 	# cell #3:
 	# Table of free vs. fixed params
 	plot(x=c(0,1),y=c(0,1), pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
-	val_txt = c("d", "e", "a", "x", "u", "b", "dp")
+	val_txt = c("d", "e", "a", "x", "u", "b")
 	Param = val_txt
 	Type = BioGeoBEARS_model_object@params_table[val_txt, "type"]
 	Init = BioGeoBEARS_model_object@params_table[val_txt, "init"]
 	Est = BioGeoBEARS_model_object@params_table[val_txt, "est"]
 	dtf = adf2(cbind(Param, Type, Init, Est))
+	dtf$Init = round(as.numeric(dtf$Init), 3)
+	dtf$Est = round(as.numeric(dtf$Est), 3)
 	row.names(dtf) = NULL
 	dtf
 	
@@ -1590,8 +1704,8 @@ plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results="run", plotwhat="i
 	par(mar=c(5,3,3,1), xaxs = "r", yaxs = "r") 
 	#plot(0,0, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
 	# plot(0,0, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
-	plotvals = c(d, e, a, x, u)
 	val_txt = c("d", "e", "a", "x", "u")
+	plotvals =  BioGeoBEARS_model_object@params_table[val_txt, plotwhat]
 	
 	# xaxt="s" means plot (anything other than "n")
 	# Get x-axis bar centers
@@ -1678,10 +1792,8 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	areas = getareas_from_tipranges_object(tipranges)
 	areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes
 	areanames = areas
+	areanames
 	
-	# Change the names to tipranges@df:
-	# this doesn't make sense if areas_list is 0-based indexes
-	names(tipranges@df) = areas_list
 	
 	if (is.na(BioGeoBEARS_run_object$max_range_size))
 		{
@@ -1700,12 +1812,6 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 		}
 	max_numareas = max_range_size
 
-
-
-	# Get the list of geographic areas
-	areas = getareas_from_tipranges_object(tipranges)
-	areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes
-	areanames = areas
 
 
 
@@ -1916,7 +2022,10 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 		barplot_yaxis_txt = c(0, 0.5, 1)
 		ylims = c(0,1.35)
 		
-		plotvals = c(y,s,v,j)
+		val_txt = c("y", "s", "v", "j")
+		plotvals =  BioGeoBEARS_model_object@params_table[val_txt, plotwhat]
+		#plotvals = c(y,s,v,j)
+		
 		# xaxt="s" means plot (anything other than "n")
 	
 		# Get x-axis bar centers
@@ -1936,7 +2045,7 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 		ylims = c(0, 1.15)
 
 		params_table = BioGeoBEARS_model_object@params_table
-		tmpvals = get_perEvent_probs(params_table)
+		tmpvals = get_perEvent_probs(params_table, plotwhat=plotwhat)
 		
 		plotvals = c(tmpvals$y, tmpvals$s, tmpvals$v, tmpvals$j)
 		# xaxt="s" means plot (anything other than "n")
@@ -2023,6 +2132,15 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	# Bottom row: depict the cladogenesis process in some fashion.
 	# Let's just do the rowSums of the cladogenesis matrix
 	#######################################################
+	# Rangesize of each state
+	tmpstates = states_list
+	if ((length(tmpstates[[1]]) == 1) && (is.na(tmpstates[[1]]) == TRUE))
+		{
+		tmpstates[[1]] = NULL
+		}
+	rangesizes = sapply(X=tmpstates, FUN=length, simplify=TRUE)
+	rangesizes
+
 	# Footer
 	#par(mar=c(0,0,0,0), xaxs = "i", yaxs = "i") 
 	par(mar=c(5,3,3,1), xaxs = "r", yaxs = "r") 
@@ -2045,14 +2163,6 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	
 	
 	
-	# Rangesize of each state
-	tmpstates = states_list
-	if ((length(tmpstates[[1]]) == 1) && (is.na(tmpstates[[1]]) == TRUE))
-		{
-		tmpstates[[1]] = NULL
-		}
-	rangesizes = sapply(X=tmpstates, FUN=length, simplify=TRUE)
-	rangesizes
 	
 	# Make a plot of ancestral range size, versus number of possible descendent pairs
 	ylims = c(0, max(max(Rsp_rowsums_count), max(rangesizes)))
@@ -2121,7 +2231,7 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	printmat
 	
 	
-	addtable2plot(printmat, x=0, y=0.8, table=printmat, display.rownames=TRUE, display.colnames=TRUE, xjust=0, yjust=0, cex=1.1)
+	addtable2plot(printmat, x=0, y=0.8, table=printmat, display.rownames=TRUE, display.colnames=TRUE, bty="o", hlines=TRUE, vlines=TRUE, xjust=0, yjust=0, cex=1.1)
 	title("Conditional probabilities of example cladogenesis events", font.main=2, cex.main=1)
 	
 	}

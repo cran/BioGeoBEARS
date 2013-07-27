@@ -417,7 +417,21 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 
 	# The likelihood of each state at the tips
 	# Change this, if you have observations instead of presence/absence at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	
+	if (BioGeoBEARS_run_object$use_detection_model == FALSE)
+		{
+		tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+		} else {
+		# Calculate the initial tip likelihoods, using the detection model
+		# Assumes correct order, double-check this
+		numareas = length(areas)
+		detects_df = inputs$detects_df
+		controls_df = inputs$controls_df
+		mean_frequency = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mf", "init"]
+		dp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["dp", "init"]
+		fdp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["fdp", "init"]
+		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency, dp, fdp, null_range_gets_0_like=TRUE)
+		}
 	tip_condlikes_of_data_on_each_state
 
 

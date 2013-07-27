@@ -2,13 +2,17 @@
 \alias{get_perEvent_probs}
 \title{Get the per-event probabilities at cladogenesis}
 \usage{
-  get_perEvent_probs(params_table, sumval = 1)
+  get_perEvent_probs(params_table, sumval = 1,
+    plotwhat = "est")
 }
 \arguments{
   \item{params_table}{The \code{params_table} from a
   \code{BioGeoBEARS_model_object}.}
 
   \item{sumval}{Default=1.}
+
+  \item{plotwhat}{Default "est", use "init" to get the
+  initial starting values instead.}
 }
 \value{
   \code{wts} Return the per-event weights

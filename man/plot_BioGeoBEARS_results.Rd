@@ -47,8 +47,8 @@
   factor, i.e. 0.5 is half size).}
 
   \item{plotsplits}{If \code{TRUE}, plot states on the
-  corners. (Pie charts on the corners are not
-  implemented.)}
+  corners -- text or pie charts, depending on
+  \code{plotwhat}.}
 
   \item{plotlegend}{If \code{TRUE}, make a (separate) plot
   with a legend giving the colors for each state/range,

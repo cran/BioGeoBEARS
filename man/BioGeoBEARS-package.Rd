@@ -9,8 +9,9 @@
 }
 \details{
   \tabular{ll}{ Package: \tab BioGeoBEARS\cr Type: \tab
-  Package\cr Version: \tab 0.2\cr Date: \tab 2012-07-25\cr
-  License: \tab GPL (>= 3)\cr LazyLoad: \tab yes\cr }
+  Package\cr Version: \tab 0.2.1\cr Date: \tab
+  2012-07-27\cr License: \tab GPL (>= 3)\cr LazyLoad: \tab
+  yes\cr }
 
   Summary: This package performs model-based statistical
   inference for historical biogeography. This includes
@@ -56,12 +57,29 @@
   package, however this package is now maintained off of
   CRAN, so its usage is not formally included in
   BioGeoBEARS at the current time.
+
+  CITATION INFO: This package is the result of my Ph.D.
+  research, please cite the package if you use it! Type:
+  citation(package="BioGeoBEARS") to get the citation
+  information.
+
+  See also the citation information for the sister
+  packages, \code{citation(package="rexpokit")} and
+  \code{citation(package="cladoRcpp")}.
 }
 \note{
   Go BEARS!
 }
 \examples{
 test=1
+
+# To get citation information for BioGeoBEARS, type:
+citation(package="BioGeoBEARS")
+
+# Please also cite the accessory packages I created to make BioGeoBEARS work:
+citation(package="cladoRcpp")
+citation(package="rexpokit")		# Roger Sidje is a coauthor of rexpokit
+                                 # and author of the FORTRAN EXPOKIT
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

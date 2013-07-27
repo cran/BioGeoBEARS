@@ -1,3 +1,25 @@
+CHANGES in BioGeoBEARS VERSION 0.21
+
+NEW FEATURES
+
+    o added detection probability models
+    o added calculations of prior probabilities of ranges, conditional likelihoods of 
+      detection/taphonomic control counts conditional on ranges, and posterior probabilities
+      of ranges, given their priors and data likelihoods
+    o added more plotting options, e.g. pie charts on corners
+    o added rounding to plot of cladogenesis model
+    o added CITATION file and information
+
+BUG FIXES
+
+    o Fixed minor bugs in the plot_BioGeoBEARS_model function.
+
+OTHER CHANGES
+
+    o none
+    
+
+
 CHANGES in BioGeoBEARS VERSION 0.2
 
 NEW FEATURES

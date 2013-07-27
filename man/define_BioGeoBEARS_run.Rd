@@ -9,13 +9,14 @@
     geogfn = "Psychotria_geog.data", timesfn = NA,
     distsfn = NA, dispersal_multipliers_fn = NA,
     area_of_areas_fn = NA, areas_allowed_fn = NA,
-    max_range_size = NA, states_list = NULL,
-    force_sparse = FALSE, print_optim = TRUE,
+    detects_fn = NA, controls_fn = NA, max_range_size = NA,
+    states_list = NULL, force_sparse = FALSE,
+    use_detection_model = FALSE, print_optim = TRUE,
     num_cores_to_use = NA, cluster_already_open = FALSE,
     use_optimx = TRUE, return_condlikes_table = FALSE,
     calc_TTL_loglike_from_condlikes_table = TRUE,
     calc_ancprobs = TRUE, fixnode = NULL, fixlikes = NULL,
-    speedup = TRUE)
+    speedup = TRUE, tmpwd = getwd())
 }
 \arguments{
   \item{abbr}{Text abbreviation of run, e.g. "default"}
@@ -52,6 +53,13 @@
   \item{areas_allowed_fn}{Filename for the allowed
   connections between areas for single-species ranges.}
 
+  \item{detects_fn}{Filename for the counts of detections
+  of OTUs of interest. See \code{\link{calc_obs_like}}.}
+
+  \item{controls_fn}{Filename for the counts of taphonomic
+  controls (which INCLUDE the OTUs of interest). See
+  \code{\link{calc_obs_like}}.}
+
   \item{max_range_size}{The maximum rangesize, in number of
   areas.  Having a smaller maximum range size means that
   you can have more areas (the size of the state space is
@@ -71,8 +79,20 @@
   Presumably the problems become less with larger matrices,
   but I have not explored this in detail.}
 
+  \item{use_detection_model}{If TRUE, use the detection
+  model (with parameters mf, dp, and fdp) and counts of
+  detections and counts of taphonomic controls to calculate
+  the \code{tip_condlikes_of_data_on_each_state}.}
+
   \item{print_optim}{If TRUE (default), print the
   optimization steps as ML estimation progresses.}
+
+  \item{tmpwd}{The working directory in which the input and
+  output files will be placed. Default is
+  \code{\link[base]{getwd}}. This is stored mostly for
+  future reference; users are responsible for manually
+  navigating to the appropriate directory ahead of time,
+  using \code{\link[base]{setwd}}.}
 
   \item{num_cores_to_use}{If >1, parallel processing will
   be attempted. \bold{Note:} parallel processing via
@@ -147,6 +167,8 @@ test=1
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
+  \code{\link{readfiles_BioGeoBEARS_run}},
+  \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}},
+  \code{\link[base]{setwd}}, \code{\link[base]{getwd}}
 }
 

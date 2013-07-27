@@ -773,7 +773,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 	#######################################################
 	# Starting tip_relative_probs_of_each_state
 	#current_condlikes_row = 0
-	tip_relative_probs_of_each_state = tip_condlikes_of_data_on_each_state
+	tip_relative_probs_of_each_state = tip_condlikes_of_data_on_each_state / rowSums(tip_condlikes_of_data_on_each_state)
 	tip_relative_probs_of_each_state
 	current_tip_relative_probs_of_each_state = tip_relative_probs_of_each_state
 	current_condlikes_row = nrow(current_tip_relative_probs_of_each_state)
